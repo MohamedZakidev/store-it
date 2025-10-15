@@ -96,7 +96,7 @@
 
   /* ===== TYPOGRAPHY */
   .h1 {
-    @apply text-[34px] leading-[42px] font-bold;
+    @apply text-[46px] leading-[42px] font-bold;
   }
 
   .h2 {
