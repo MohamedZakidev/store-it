@@ -31,10 +31,12 @@ function authLayout({ children }: { children: React.ReactNode }) {
             </section>
 
             <section className="flex flex-1 flex-col items-center bg-white p-4 py-10 lg:p-10 lg:py-0 lg:justify-center">
-
+                <div className="mb-16 lg:hidden">
+                    <Image src={'/assets/icons/logo-full-brand.svg'} alt="logo" width={224} height={82} className="h-auto w-[200px]" />
+                </div>
+                {children}
             </section>
 
-            {children}
         </div>
     );
 }
