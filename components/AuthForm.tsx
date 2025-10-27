@@ -34,7 +34,6 @@ function generateAuthFormSchema(formType: authFormType) {
 
 function AuthForm({ type }: authFormProps) {
   // state
-  console.log("auth form render");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -54,6 +53,7 @@ function AuthForm({ type }: authFormProps) {
   function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
+    console.log("on submit");
     console.log(values);
   }
 
