@@ -1,9 +1,8 @@
+import AuthForm from "@/components/AuthForm"
 
 function SignIn() {
     return (
-        <div>
-            SignIn
-        </div>
+        <AuthForm type="sign-in" />
     )
 }
 
