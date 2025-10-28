@@ -14,10 +14,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { createAccount } from "@/lib/actions/user.actions";
 import { authFormProps, authFormType } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import OTPModal from "./OTPModal";
 
 function generateAuthFormSchema(formType: authFormType) {
   return z.object({
@@ -36,7 +38,7 @@ function AuthForm({ type }: authFormProps) {
   // state
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState("");
-
+  const [accountId, setAccountId] = useState("");
   // form schema
   const formSchema = generateAuthFormSchema(type);
 
@@ -50,11 +52,21 @@ function AuthForm({ type }: authFormProps) {
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log("on submit");
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    setErrorMessage("");
+    try {
+      const userId = await createAccount({
+        fullName: values.fullName || "",
+        email: values.email,
+      });
+      setAccountId(userId);
+    } catch (error) {
+      console.log(error);
+      setErrorMessage("Failed to create an account. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -141,6 +153,9 @@ function AuthForm({ type }: authFormProps) {
         </form>
       </Form>
       {/* otp verfication */}
+      {true && (
+        <OTPModal email={form.getValues("email")} accountId={accountId} />
+      )}
     </>
   );
 }

@@ -93,7 +93,6 @@
 }
 
 @layer utilities {
-
   /* ===== TYPOGRAPHY */
   .h1 {
     @apply text-[46px] leading-[42px] font-bold;

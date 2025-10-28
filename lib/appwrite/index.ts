@@ -1,4 +1,6 @@
-import { Account, Avatars, Client, Databases, Storage } from "appwrite";
+"use server";
+
+import { Account, Avatars, Client, Storage, TablesDB } from "appwrite";
 import { cookies } from "next/headers";
 import { appwriteConfig } from "./config";
 
@@ -17,8 +19,8 @@ export async function createSessionClient() {
     get account() {
       return new Account(client);
     },
-    get databases() {
-      return new Databases(client);
+    get tablesDB() {
+      return new TablesDB(client);
     },
   };
 }
@@ -28,12 +30,13 @@ export async function createAdminClient() {
     .setEndpoint(appwriteConfig.endpointUrl)
     .setProject(appwriteConfig.projectId)
     .setDevKey(appwriteConfig.secretKey);
+
   return {
     get account() {
       return new Account(client);
     },
-    get databases() {
-      return new Databases(client);
+    get tablesDB() {
+      return new TablesDB(client);
     },
     get storage() {
       return new Storage(client);
