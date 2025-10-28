@@ -23,7 +23,7 @@ export async function getUserByEmail(email: string) {
   return result.total > 0 ? result.rows[0] : null;
 }
 
-// this is where the user get created in the auth system if email doesnot exist
+// this is where the user get created in the auth system if email doesnot exist and send otp to the email
 export async function sendEmailOTP(email: string) {
   const { account } = await createAdminClient();
   try {
@@ -66,6 +66,7 @@ export async function createAccount({ fullName, email }: createAccountParams) {
   // return parseStringify(accountId);
 }
 
+// verify the otp entered by the user and create a session if otp is correct
 export async function verifyEmailOTP({
   accountId,
   password,

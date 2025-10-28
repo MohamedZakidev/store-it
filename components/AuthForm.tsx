@@ -39,6 +39,7 @@ function AuthForm({ type }: authFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [accountId, setAccountId] = useState("");
+  console.log({ accountId });
   // form schema
   const formSchema = generateAuthFormSchema(type);
 
@@ -152,8 +153,7 @@ function AuthForm({ type }: authFormProps) {
           </div>
         </form>
       </Form>
-      {/* otp verfication */}
-      {true && (
+      {accountId && (
         <OTPModal email={form.getValues("email")} accountId={accountId} />
       )}
     </>

@@ -1,3 +1,4 @@
+"use client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,7 +14,9 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { sendEmailOTP, verifyEmailOTP } from "@/lib/actions/user.actions";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "./ui/button";
 
@@ -23,14 +26,22 @@ type OPTModalProps = {
 };
 
 function OTPModal({ email, accountId }: OPTModalProps) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(accountId.length > 0);
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState("");
 
-  async function handleSubmit(e: React.MouseEventHandler<HTMLButtonElement>) {
+  const router = useRouter();
+
+  async function handleSubmit(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
     setIsLoading(true);
     try {
-      // Simulate API call
+      const sessionId = await verifyEmailOTP({ accountId, password });
+      console.log({ sessionId });
+      if (sessionId) {
+        setIsOpen(false);
+        router.push("/");
+      }
     } catch (error) {
       console.log("Failed to verify OTP", error);
     } finally {
@@ -38,8 +49,8 @@ function OTPModal({ email, accountId }: OPTModalProps) {
     }
   }
 
-  async function handleResendOTP(params) {
-    return params;
+  async function handleResendOTP() {
+    await sendEmailOTP(email);
   }
 
   return (
