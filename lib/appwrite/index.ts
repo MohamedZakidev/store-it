@@ -2,7 +2,7 @@
 import { Account, Avatars, Client, Storage, TablesDB } from "appwrite";
 import { appwriteConfig } from "./config";
 
-export const createSessionClient = async () => {
+export async function createSessionClient() {
   const client = new Client()
     .setEndpoint(appwriteConfig.endpointUrl)
     .setProject(appwriteConfig.projectId);
