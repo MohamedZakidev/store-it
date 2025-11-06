@@ -2,9 +2,10 @@
 
 import { createAccountParams, verifyEmailOtpParams } from "@/types";
 import { ID, Query } from "appwrite";
-import { cookies } from "next/headers";
-import { createAdminClient } from "../appwrite";
+import { account } from "../appwrite/client";
 import { appwriteConfig } from "../appwrite/config";
+import { createAdminClient } from "../appwrite/server";
+import { parseStringify } from "../utils";
 
 // helper functions
 
@@ -59,11 +60,10 @@ export async function createAccount({ fullName, email }: createAccountParams) {
         },
       });
     } catch (error) {
-      handleError(error, "Failed to create user account");
+      handleError(error, "Failed to create user account in the database");
     }
   }
-  return accountId;
-  // return parseStringify(accountId);
+  return parseStringify(accountId);
 }
 
 // verify the otp entered by the user and create a session if otp is correct
@@ -78,15 +78,19 @@ export async function verifyEmailOTP({
       secret: password,
     });
 
-    (await cookies()).set("appwrite_session", session.secret, {
-      path: "/",
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-    });
-
     return session.$id;
   } catch (error) {
     handleError(error, "Failed to verify OTP");
+  }
+}
+
+export async function getAuthunticatedUser() {
+  try {
+    // console.log({ account })
+    const result = await account.get();
+    console.log({ result });
+    // return result;
+  } catch (error) {
+    handleError(error, "Failed to get authenticated user");
   }
 }

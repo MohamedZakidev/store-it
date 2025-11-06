@@ -37,9 +37,7 @@ function OTPModal({ email, accountId }: OPTModalProps) {
     setIsLoading(true);
     try {
       const sessionId = await verifyEmailOTP({ accountId, password });
-      console.log({ sessionId });
       if (sessionId) {
-        setIsOpen(false);
         router.push("/");
       }
     } catch (error) {

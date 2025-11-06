@@ -27,9 +27,9 @@ function generateAuthFormSchema(formType: authFormType) {
     fullName:
       formType === "sign-up"
         ? z
-            .string()
-            .min(2, "Your name must be at least 2 characters long")
-            .max(50)
+          .string()
+          .min(2, "Your name must be at least 2 characters long")
+          .max(50)
         : z.string().optional(),
   });
 }
@@ -39,7 +39,7 @@ function AuthForm({ type }: authFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [accountId, setAccountId] = useState("");
-  console.log({ accountId });
+
   // form schema
   const formSchema = generateAuthFormSchema(type);
 
