@@ -2,6 +2,21 @@
 import { Account, Avatars, Client, Storage, TablesDB } from "appwrite";
 import { appwriteConfig } from "./config";
 
+export const createSessionClient = async () => {
+  const client = new Client()
+    .setEndpoint(appwriteConfig.endpointUrl)
+    .setProject(appwriteConfig.projectId);
+
+
+  return {
+    get account() {
+      return new Account(client);
+    },
+    get tablesDB() {
+      return new TablesDB(client);
+    },
+  };
+};
 
 // SERVER-SIDE (Admin)
 export async function createAdminClient() {

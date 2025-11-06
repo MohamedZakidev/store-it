@@ -2,9 +2,8 @@
 
 import { createAccountParams, verifyEmailOtpParams } from "@/types";
 import { ID, Query } from "appwrite";
-import { account } from "../appwrite/client";
+import { createAdminClient, createSessionClient } from "../appwrite";
 import { appwriteConfig } from "../appwrite/config";
-import { createAdminClient } from "../appwrite/server";
 import { parseStringify } from "../utils";
 
 // helper functions
@@ -87,6 +86,7 @@ export async function verifyEmailOTP({
 export async function getAuthunticatedUser() {
   try {
     // console.log({ account })
+    const { account } = await createSessionClient()
     const result = await account.get();
     console.log({ result });
     // return result;
