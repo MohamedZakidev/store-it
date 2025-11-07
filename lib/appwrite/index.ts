@@ -1,5 +1,6 @@
 "use server"
-import { Account, Avatars, Client, Storage, TablesDB } from "appwrite";
+import { cookies } from "next/headers";
+import { Account, Avatars, Client, Storage, TablesDB } from "node-appwrite";
 import { appwriteConfig } from "./config";
 
 export async function createSessionClient() {
@@ -7,6 +8,12 @@ export async function createSessionClient() {
     .setEndpoint(appwriteConfig.endpointUrl)
     .setProject(appwriteConfig.projectId);
 
+  const session = (await cookies()).get("appwrite-session");
+  if (!session || !session.value) {
+    throw new Error("No session");
+  }
+
+  client.setSession(session.value);
 
   return {
     get account() {
@@ -23,7 +30,7 @@ export async function createAdminClient() {
   const client = new Client()
     .setEndpoint(appwriteConfig.endpointUrl)
     .setProject(appwriteConfig.projectId)
-    .setDevKey(appwriteConfig.secretDevKey);
+    .setKey(appwriteConfig.secretKey)
 
   return {
     get account() {

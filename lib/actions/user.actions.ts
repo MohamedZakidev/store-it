@@ -1,7 +1,8 @@
 "use server";
 
 import { createAccountParams, verifyEmailOtpParams } from "@/types";
-import { ID, Query } from "appwrite";
+import { cookies } from "next/headers";
+import { ID, Query } from "node-appwrite";
 import { createAdminClient, createSessionClient } from "../appwrite";
 import { appwriteConfig } from "../appwrite/config";
 import { parseStringify } from "../utils";
@@ -77,6 +78,13 @@ export async function verifyEmailOTP({
       secret: password,
     });
 
+    (await cookies()).set("appwrite-session", session.secret, {
+      path: "/",
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+    });
+
     return session.$id;
   } catch (error) {
     handleError(error, "Failed to verify OTP");
@@ -85,11 +93,15 @@ export async function verifyEmailOTP({
 
 export async function getAuthunticatedUser() {
   try {
-    // console.log({ account })
-    const { account } = await createSessionClient()
+    const { account, tablesDB } = await createSessionClient()
     const result = await account.get();
-    console.log({ result });
-    // return result;
+    const user = await tablesDB.listRows({
+      databaseId: appwriteConfig.databaseId,
+      tableId: appwriteConfig.usersTableId,
+      queries: [Query.equal("accountId", result.$id)]
+    })
+    return user.total > 0 ? user.rows[0] : null
+
   } catch (error) {
     handleError(error, "Failed to get authenticated user");
   }
