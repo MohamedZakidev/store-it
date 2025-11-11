@@ -6,20 +6,23 @@ import { redirect } from "next/navigation";
 
 async function layout({ children }: { children: React.ReactNode }) {
   const authenticatedUser = await getAuthunticatedUser();
-  console.log(authenticatedUser)
+
   if (!authenticatedUser) {
-    return redirect("/sign-in")
+    return redirect("/sign-in");
   }
-  const { fullName, email, avatar } = authenticatedUser
+
+  const { accountId, fullName, email, avatar } = authenticatedUser;
+
   return (
     <main className="flex h-screen">
-      <Sidebar
-        fullName={fullName}
-        email={email}
-        avatar={avatar}
-      />
+      <Sidebar fullName={fullName} email={email} avatar={avatar} />
       <section className="flex flex-col h-full flex-1">
-        <MobileNav />
+        <MobileNav
+          fullName={fullName}
+          email={email}
+          avatar={avatar}
+          accountId={accountId}
+        />
         <Header />
         <div className="main-content">{children}</div>
       </section>

@@ -2,6 +2,7 @@
 
 import { createAccountParams, verifyEmailOtpParams } from "@/types";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { ID, Query } from "node-appwrite";
 import { createAdminClient, createSessionClient } from "../appwrite";
 import { appwriteConfig } from "../appwrite/config";
@@ -77,7 +78,7 @@ export async function verifyEmailOTP({
       userId: accountId,
       secret: password,
     });
-
+    console.log(session.$id, "sessionId");
     (await cookies()).set("appwrite-session", session.secret, {
       path: "/",
       httpOnly: true,
@@ -92,17 +93,30 @@ export async function verifyEmailOTP({
 }
 
 export async function getAuthunticatedUser() {
+  const { account, tablesDB } = await createSessionClient();
   try {
-    const { account, tablesDB } = await createSessionClient()
     const result = await account.get();
     const user = await tablesDB.listRows({
       databaseId: appwriteConfig.databaseId,
       tableId: appwriteConfig.usersTableId,
-      queries: [Query.equal("accountId", result.$id)]
-    })
-    return user.total > 0 ? user.rows[0] : null
-
+      queries: [Query.equal("accountId", result.$id)],
+    });
+    return user.total > 0 ? user.rows[0] : null;
   } catch (error) {
     handleError(error, "Failed to get authenticated user");
+  }
+}
+
+export async function logoutUser() {
+  const { account } = await createSessionClient();
+  try {
+    await account.deleteSession({
+      sessionId: "current",
+    });
+    (await cookies()).delete("appwrite-session");
+  } catch (error) {
+    handleError(error, "Failed to logout user");
+  } finally {
+    redirect("/sign-in");
   }
 }

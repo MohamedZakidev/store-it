@@ -1,5 +1,7 @@
+import { logoutUser } from "@/lib/actions/user.actions";
 import Image from "next/image";
 import FileUploader from "../FileUploader";
+import { Button } from "../ui/button";
 import Search from "./Search";
 
 function Header() {
@@ -9,8 +11,8 @@ function Header() {
 
       <div className="header-wrapper">
         <FileUploader />
-        <form>
-          <button type="submit" className="sign-out-button">
+        <form action={logoutUser}>
+          <Button type="submit" className="sign-out-button">
             <Image
               src="/assets/icons/logout.svg"
               alt="logout logo"
@@ -18,7 +20,7 @@ function Header() {
               height={24}
               className="w-6"
             />
-          </button>
+          </Button>
         </form>
       </div>
     </header>

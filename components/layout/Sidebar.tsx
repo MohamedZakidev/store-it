@@ -5,10 +5,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-function Sidebar() {
+type SidebarProps = {
+  fullName: string;
+  email: string;
+  avatar: string;
+};
+
+function Sidebar({ fullName, email, avatar }: SidebarProps) {
   const pathname = usePathname();
   return (
-    <aside className="sidebar border border-brand">
+    <aside className="sidebar">
       <Link href="/">
         <Image
           src="/assets/icons/logo-brand.svg"
@@ -59,15 +65,15 @@ function Sidebar() {
       />
       <div className="sidebar-user-info">
         <Image
-          src="/assets/images/avatar.png"
+          src={avatar || "/assets/images/avatar.png"}
           alt="User Avatar"
           width={44}
           height={44}
           className="sidebar-user-avatar"
         />
         <div className="hidden lg:block">
-          <p className="subtitle-2 capitalize">fullname</p>
-          <p className="caption">email</p>
+          <p className="subtitle-2 capitalize">{fullName}</p>
+          <p className="caption">{email}</p>
         </div>
       </div>
     </aside>

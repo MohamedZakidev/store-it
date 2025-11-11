@@ -1,5 +1,6 @@
-"use server"
+"use server";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { Account, Avatars, Client, Storage, TablesDB } from "node-appwrite";
 import { appwriteConfig } from "./config";
 
@@ -10,7 +11,8 @@ export async function createSessionClient() {
 
   const session = (await cookies()).get("appwrite-session");
   if (!session || !session.value) {
-    throw new Error("No session");
+    // throw new Error("No session");
+    redirect("/sign-in");
   }
 
   client.setSession(session.value);
@@ -23,14 +25,14 @@ export async function createSessionClient() {
       return new TablesDB(client);
     },
   };
-};
+}
 
 // SERVER-SIDE (Admin)
 export async function createAdminClient() {
   const client = new Client()
     .setEndpoint(appwriteConfig.endpointUrl)
     .setProject(appwriteConfig.projectId)
-    .setKey(appwriteConfig.secretKey)
+    .setKey(appwriteConfig.secretKey);
 
   return {
     get account() {
