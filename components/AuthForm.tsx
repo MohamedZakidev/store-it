@@ -27,9 +27,9 @@ function generateAuthFormSchema(formType: authFormType) {
     fullName:
       formType === "sign-up"
         ? z
-            .string()
-            .min(2, "Your name must be at least 2 characters long")
-            .max(50)
+          .string()
+          .min(2, "Your name must be at least 2 characters long")
+          .max(50)
         : z.string().optional(),
   });
 }
@@ -63,9 +63,9 @@ function AuthForm({ type }: authFormProps) {
       const userId =
         type === "sign-up"
           ? await createAccount({
-              fullName: values.fullName || "",
-              email: values.email,
-            })
+            fullName: values.fullName || "",
+            email: values.email,
+          })
           : await signInUser({ email: values.email });
       setAccountId(userId);
     } catch {
@@ -158,9 +158,9 @@ function AuthForm({ type }: authFormProps) {
           </div>
         </form>
       </Form>
-      {/* {accountId && ( */}
-      <OTPModal email={form.getValues("email")} accountId={accountId} />
-      {/* )} */}
+      {accountId && (
+        <OTPModal email={form.getValues("email")} accountId={accountId} />
+      )}
     </>
   );
 }

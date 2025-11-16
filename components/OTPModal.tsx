@@ -17,7 +17,7 @@ import {
 import { sendEmailOTP, verifyEmailOTP } from "@/lib/actions/user.actions";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 
 type OPTModalProps = {
@@ -32,6 +32,11 @@ function OTPModal({ email, accountId }: OPTModalProps) {
   console.log(isOpen);
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState("");
+
+  // Sync isOpen state when accountId changes
+  useEffect(() => {
+    setIsOpen(accountId.length > 0);
+  }, [accountId]);
 
   const router = useRouter();
 
