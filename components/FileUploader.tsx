@@ -1,22 +1,75 @@
-"use client"
+"use client";
+import { MAX_FILE_SIZE } from "@/constants";
+import { useToast } from "@/hooks/use-toast";
+import { uploadFile } from "@/lib/actions/file.action";
 import { convertFileToUrl, getFileType } from "@/lib/utils";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import Thumbnail from "./Thumbnail";
 import { Button } from "./ui/button";
 
 type FileUploaderProps = {
-  className: string
-}
+  className?: string;
+  ownerId: string;
+  accountId: string;
+};
 
-function FileUploader({ className }: FileUploaderProps) {
-  const [files, setFiles] = useState<File[]>([])
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    // Do something with the files
-    setFiles(acceptedFiles)
-  }, [])
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop })
+export default function FileUploader({
+  ownerId,
+  accountId,
+  className,
+}: FileUploaderProps) {
+  const [files, setFiles] = useState<File[]>([]);
+  const { toast } = useToast();
+  const path = usePathname();
+
+  const onDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      setFiles(acceptedFiles);
+
+      const uploadPromises = acceptedFiles.map(async (file) => {
+        if (file.size > MAX_FILE_SIZE) {
+          setFiles((prevFiles) =>
+            prevFiles.filter((f) => f.name !== file.name)
+          );
+          return toast({
+            description: (
+              <p className="body-2 text-white">
+                <span className="font-semibold">{file.name}</span> is too large.
+                Max file size is 50MB.
+              </p>
+            ),
+            className: "error-toast",
+          });
+        }
+
+        return uploadFile({ file, ownerId, accountId, path }).then(
+          (uploadedFile) => {
+            if (uploadedFile) {
+              setFiles((prevFiles) =>
+                prevFiles.filter((f) => f.name !== file.name)
+              );
+            }
+          }
+        );
+      });
+      await Promise.all(uploadPromises);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [ownerId, accountId, path]
+  );
+
+  const { getRootProps, getInputProps } = useDropzone({ onDrop });
+
+  function handleRemoveFile(
+    e: React.MouseEvent<HTMLImageElement>,
+    fileName: string
+  ) {
+    e.stopPropagation();
+    setFiles((prev) => prev.filter((file) => file.name !== fileName));
+  }
 
   return (
     <div {...getRootProps()} className="cursor-pointer">
@@ -34,9 +87,12 @@ function FileUploader({ className }: FileUploaderProps) {
         <ul className="uploader-preview-list">
           <h4 className="h4 text-light-100">Uploading</h4>
           {files.map((file, index) => {
-            const { type, extension } = getFileType(file.name)
+            const { type, extension } = getFileType(file.name);
             return (
-              <li key={`${file.name}-${index}`} className="uploader-preview-item">
+              <li
+                key={`${file.name}-${index}`}
+                className="uploader-preview-item"
+              >
                 <div className="flex items-center gap-3">
                   <Thumbnail
                     type={type}
@@ -54,24 +110,17 @@ function FileUploader({ className }: FileUploaderProps) {
                   </div>
                 </div>
                 <Image
-                  src="/public/assets/icons/remove.svg"
+                  src="/assets/icons/remove.svg"
                   width={24}
                   height={24}
                   alt="remove"
                   onClick={(e) => handleRemoveFile(e, file.name)}
                 />
               </li>
-            )
+            );
           })}
         </ul>
       )}
-      {
-        isDragActive ?
-          <p>Drop the files here ...</p> :
-          <p>Drag & drop some files here, or click to select files</p>
-      }
     </div>
-  )
+  );
 }
-
-export default FileUploader;

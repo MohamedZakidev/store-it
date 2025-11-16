@@ -25,6 +25,20 @@ export async function getUserByEmail(email: string) {
   return result.total > 0 ? result.rows[0] : null;
 }
 
+export async function getUserByrowId(userId: string) {
+  const { tablesDB } = await createAdminClient();
+  try {
+    const user = await tablesDB.getRow({
+      databaseId: appwriteConfig.databaseId,
+      tableId: appwriteConfig.usersTableId,
+      rowId: userId,
+    });
+    return user;
+  } catch (error) {
+    handleError(error, "Failed to get user by row ID");
+  }
+}
+
 // this is where the user get created in the auth system if email doesnot exist and send otp to the email
 export async function sendEmailOTP(email: string) {
   const { account } = await createAdminClient();
@@ -78,7 +92,6 @@ export async function verifyEmailOTP({
       userId: accountId,
       secret: password,
     });
-    console.log(session.$id, "sessionId");
     (await cookies()).set("appwrite-session", session.secret, {
       path: "/",
       httpOnly: true,
@@ -92,7 +105,7 @@ export async function verifyEmailOTP({
   }
 }
 
-export async function getAuthunticatedUser() {
+export async function getAuthenticatedUser() {
   const { account, tablesDB } = await createSessionClient();
   try {
     const result = await account.get();
@@ -118,5 +131,21 @@ export async function logoutUser() {
     handleError(error, "Failed to logout user");
   } finally {
     redirect("/sign-in");
+  }
+}
+
+export async function signInUser({ email }: { email: string }) {
+  try {
+    const existingUser = await getUserByEmail(email);
+
+    // User exists, send OTP
+    if (existingUser) {
+      await sendEmailOTP(email);
+      return existingUser.accountId;
+    }
+
+    return { accountId: null, error: "User not found" };
+  } catch (error) {
+    handleError(error, "Failed to sign in user");
   }
 }

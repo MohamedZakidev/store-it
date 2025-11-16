@@ -20,9 +20,16 @@ type MobileNavProps = {
   email: string;
   avatar: string;
   accountId: string;
+  ownerId: string;
 };
 
-function MobileNav({ fullName, email, avatar, accountId }: MobileNavProps) {
+function MobileNav({
+  fullName,
+  email,
+  avatar,
+  ownerId,
+  accountId,
+}: MobileNavProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   return (
@@ -86,7 +93,7 @@ function MobileNav({ fullName, email, avatar, accountId }: MobileNavProps) {
           </nav>
           <Separator className="my-5 bg-light-200/20" />
           <div className="flex flex-col justify-between gap-5 pb-5">
-            <FileUploader />
+            <FileUploader ownerId={ownerId} accountId={accountId} />
             <Button
               type="submit"
               className="sign-out-button"

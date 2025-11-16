@@ -1,32 +1,33 @@
 import Header from "@/components/layout/Header";
 import MobileNav from "@/components/layout/MobileNav";
 import Sidebar from "@/components/layout/Sidebar";
-import { getAuthunticatedUser } from "@/lib/actions/user.actions";
+import { getAuthenticatedUser } from "@/lib/actions/user.actions";
 import { redirect } from "next/navigation";
 
 async function layout({ children }: { children: React.ReactNode }) {
-  const authenticatedUser = await getAuthunticatedUser();
+  const authenticatedUser = await getAuthenticatedUser();
 
   if (!authenticatedUser) {
     return redirect("/sign-in");
   }
 
-  const { accountId, fullName, email, avatar } = authenticatedUser;
+  const { $id, accountId, fullName, email, avatar } = authenticatedUser;
 
   return (
-    <main className="flex h-screen">
+    <div className="flex h-screen">
       <Sidebar fullName={fullName} email={email} avatar={avatar} />
-      <section className="flex flex-col h-full flex-1">
+      <div className="flex flex-col h-full flex-1">
         <MobileNav
           fullName={fullName}
           email={email}
           avatar={avatar}
           accountId={accountId}
+          ownerId={$id}
         />
-        <Header />
+        <Header ownerId={$id} accountId={accountId} />
         <div className="main-content">{children}</div>
-      </section>
-    </main>
+      </div>
+    </div>
   );
 }
 

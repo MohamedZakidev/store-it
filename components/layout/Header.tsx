@@ -4,13 +4,18 @@ import FileUploader from "../FileUploader";
 import { Button } from "../ui/button";
 import Search from "./Search";
 
-function Header() {
+type HeaderProps = {
+  ownerId: string;
+  accountId: string;
+};
+
+function Header({ ownerId, accountId }: HeaderProps) {
   return (
     <header className="header border-2 border-black">
       <Search />
 
       <div className="header-wrapper">
-        <FileUploader />
+        <FileUploader ownerId={ownerId} accountId={accountId} />
         <form action={logoutUser}>
           <Button type="submit" className="sign-out-button">
             <Image

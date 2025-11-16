@@ -26,7 +26,10 @@ type OPTModalProps = {
 };
 
 function OTPModal({ email, accountId }: OPTModalProps) {
-  const [isOpen, setIsOpen] = useState(accountId.length > 0);
+  const isOpenInitial = accountId.length > 0;
+  console.log(isOpenInitial, "from optmodal component");
+  const [isOpen, setIsOpen] = useState(isOpenInitial);
+  console.log(isOpen);
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState("");
 
@@ -44,7 +47,13 @@ function OTPModal({ email, accountId }: OPTModalProps) {
       console.log("Failed to verify OTP", error);
     } finally {
       setIsLoading(false);
+      setIsOpen(false);
     }
+  }
+
+  function handleClose() {
+    setIsOpen(false);
+    setIsLoading(false);
   }
 
   async function handleResendOTP() {
@@ -62,7 +71,7 @@ function OTPModal({ email, accountId }: OPTModalProps) {
               alt="close"
               width={20}
               height={20}
-              onClick={() => setIsOpen(false)}
+              onClick={handleClose}
               className="otp-close-button"
             />
           </AlertDialogTitle>

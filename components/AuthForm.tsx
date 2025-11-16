@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { createAccount } from "@/lib/actions/user.actions";
+import { createAccount, signInUser } from "@/lib/actions/user.actions";
 import { authFormProps, authFormType } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
@@ -27,9 +27,9 @@ function generateAuthFormSchema(formType: authFormType) {
     fullName:
       formType === "sign-up"
         ? z
-          .string()
-          .min(2, "Your name must be at least 2 characters long")
-          .max(50)
+            .string()
+            .min(2, "Your name must be at least 2 characters long")
+            .max(50)
         : z.string().optional(),
   });
 }
@@ -56,15 +56,20 @@ function AuthForm({ type }: authFormProps) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     setErrorMessage("");
+    // setAccountId("test-account-id");
+    // setIsLoading(false);
+
     try {
-      const userId = await createAccount({
-        fullName: values.fullName || "",
-        email: values.email,
-      });
+      const userId =
+        type === "sign-up"
+          ? await createAccount({
+              fullName: values.fullName || "",
+              email: values.email,
+            })
+          : await signInUser({ email: values.email });
       setAccountId(userId);
-    } catch (error) {
-      console.log(error);
-      setErrorMessage("Failed to create an account. Please try again.");
+    } catch {
+      setErrorMessage("Failed to create account. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -153,9 +158,9 @@ function AuthForm({ type }: authFormProps) {
           </div>
         </form>
       </Form>
-      {accountId && (
-        <OTPModal email={form.getValues("email")} accountId={accountId} />
-      )}
+      {/* {accountId && ( */}
+      <OTPModal email={form.getValues("email")} accountId={accountId} />
+      {/* )} */}
     </>
   );
 }
