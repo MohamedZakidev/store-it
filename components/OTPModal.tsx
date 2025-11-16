@@ -17,26 +17,20 @@ import {
 import { sendEmailOTP, verifyEmailOTP } from "@/lib/actions/user.actions";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "./ui/button";
 
 type OPTModalProps = {
   email: string;
   accountId: string;
+  setAccountId: (accountId: string) => void;
 };
 
-function OTPModal({ email, accountId }: OPTModalProps) {
+function OTPModal({ email, accountId, setAccountId }: OPTModalProps) {
   const isOpenInitial = accountId.length > 0;
-  console.log(isOpenInitial, "from optmodal component");
   const [isOpen, setIsOpen] = useState(isOpenInitial);
-  console.log(isOpen);
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState("");
-
-  // Sync isOpen state when accountId changes
-  useEffect(() => {
-    setIsOpen(accountId.length > 0);
-  }, [accountId]);
 
   const router = useRouter();
 
@@ -59,6 +53,7 @@ function OTPModal({ email, accountId }: OPTModalProps) {
   function handleClose() {
     setIsOpen(false);
     setIsLoading(false);
+    setAccountId("");
   }
 
   async function handleResendOTP() {
