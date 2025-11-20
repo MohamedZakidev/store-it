@@ -38,7 +38,7 @@ function AuthForm({ type }: authFormProps) {
   // state
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [accountId, setAccountId] = useState("");
+  const [accountId, setAccountId] = useState<string | null>("");
 
   // form schema
   const formSchema = generateAuthFormSchema(type);
@@ -156,6 +156,11 @@ function AuthForm({ type }: authFormProps) {
               </p>
             )}
           </div>
+          {accountId === null && (
+            <p className="error-message">
+              Email not found. Please create an account to continue.
+            </p>
+          )}
         </form>
       </Form>
       {accountId && (

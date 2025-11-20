@@ -137,14 +137,13 @@ export async function logoutUser() {
 export async function signInUser({ email }: { email: string }) {
   try {
     const existingUser = await getUserByEmail(email);
-
     // User exists, send OTP
     if (existingUser) {
       await sendEmailOTP(email);
       return existingUser.accountId;
     }
 
-    return { accountId: null, error: "User not found" };
+    return null;
   } catch (error) {
     handleError(error, "Failed to sign in user");
   }
