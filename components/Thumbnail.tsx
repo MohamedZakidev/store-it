@@ -17,11 +17,11 @@ function Thumbnail({
   imgClassName,
 }: ThumbnailProps) {
   const isImage = type === "image" && extension !== "svg";
-  const imgSrc = isImage ? url.split("&mode")[0] : "";
+  // const imgSrc = isImage ? url.split("&mode")[0] : "";
   return (
     <figure className={`thumbnail ${className}`}>
       <Image
-        src={isImage ? imgSrc : getFileIcon(type, extension)}
+        src={isImage ? url : getFileIcon(extension, type)}
         alt="thumbnail"
         width={100}
         height={100}

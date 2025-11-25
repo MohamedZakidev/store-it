@@ -31,6 +31,7 @@ function OTPModal({ email, accountId, setAccountId }: OPTModalProps) {
   const [isOpen, setIsOpen] = useState(isOpenInitial);
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState("");
+  const [optError, setOptError] = useState("");
 
   const router = useRouter();
 
@@ -40,13 +41,14 @@ function OTPModal({ email, accountId, setAccountId }: OPTModalProps) {
     try {
       const sessionId = await verifyEmailOTP({ accountId, password });
       if (sessionId) {
+        setOptError("");
         router.push("/");
       }
     } catch (error) {
       console.log("Failed to verify OTP", error);
+      setOptError("Failed to verify OTP");
     } finally {
       setIsLoading(false);
-      setIsOpen(false);
     }
   }
 
@@ -109,6 +111,7 @@ function OTPModal({ email, accountId, setAccountId }: OPTModalProps) {
                 />
               )}
             </AlertDialogAction>
+            {optError && <p className="error-message">{optError}</p>}
             <div className="flex justify-center items-center subtitle-2 mt-2 text-light-100 text-center">
               <p>Didn’t get a code?</p>
               <Button

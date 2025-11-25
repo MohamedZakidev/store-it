@@ -1,6 +1,6 @@
 "use server";
 
-import { createAccountParams, verifyEmailOtpParams } from "@/types";
+import { CreateAccountParams, VerifyEmailOtpParams } from "@/types";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ID, Query } from "node-appwrite";
@@ -54,7 +54,7 @@ export async function sendEmailOTP(email: string) {
 }
 
 // create a new user account in the user table inside the database
-export async function createAccount({ fullName, email }: createAccountParams) {
+export async function createAccount({ fullName, email }: CreateAccountParams) {
   const accountId = await sendEmailOTP(email);
   if (!accountId) throw new Error("Failed to send an OTP");
 
@@ -85,13 +85,14 @@ export async function createAccount({ fullName, email }: createAccountParams) {
 export async function verifyEmailOTP({
   accountId,
   password,
-}: verifyEmailOtpParams) {
+}: VerifyEmailOtpParams) {
   try {
     const { account } = await createAdminClient();
     const session = await account.createSession({
       userId: accountId,
       secret: password,
     });
+
     (await cookies()).set("appwrite-session", session.secret, {
       path: "/",
       httpOnly: true,

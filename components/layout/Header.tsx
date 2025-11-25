@@ -11,7 +11,7 @@ type HeaderProps = {
 
 function Header({ ownerId, accountId }: HeaderProps) {
   return (
-    <header className="header border-2 border-black">
+    <header className="header">
       <Search />
 
       <div className="header-wrapper">

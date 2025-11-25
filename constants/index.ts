@@ -56,11 +56,11 @@ export const actionsDropdownItems = [
 
 export const sortTypes = [
   {
-    label: "Date created (newest)",
+    label: "Newest",
     value: "$createdAt-desc",
   },
   {
-    label: "Created Date (oldest)",
+    label: "Oldest",
     value: "$createdAt-asc",
   },
   {

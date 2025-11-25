@@ -20,6 +20,21 @@ export function constructFileUrl(fileId: string) {
   return `${endpointUrl}/storage/buckets/${appwriteConfig.bucketId}/files/${fileId}/view?project=${projectId}`;
 }
 
+export const getFileTypesParams = (type: string) => {
+  switch (type) {
+    case "documents":
+      return ["document"];
+    case "images":
+      return ["image"];
+    case "media":
+      return ["video", "audio"];
+    case "others":
+      return ["other"];
+    default:
+      return [];
+  }
+};
+
 export const getFileType = (fileName: string) => {
   const extension = fileName.split(".").pop()?.toLowerCase();
 

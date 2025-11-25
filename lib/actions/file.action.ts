@@ -1,6 +1,12 @@
 "use server";
 
-import { RenameFileParams, uploadFileParams } from "@/types";
+import {
+  DeleteFileParams,
+  getFilesParams,
+  RenameFileParams,
+  UpdateSharedUsersFileParams,
+  UploadFileParams,
+} from "@/types";
 import { revalidatePath } from "next/cache";
 import { ID, Models, Query } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
@@ -19,7 +25,7 @@ export async function uploadFile({
   ownerId,
   accountId,
   path,
-}: uploadFileParams) {
+}: UploadFileParams) {
   const { storage, tablesDB } = await createAdminClient();
   const inputFile = InputFile.fromBuffer(file, file.name);
 
@@ -54,7 +60,7 @@ export async function uploadFile({
           bucketId: appwriteConfig.bucketId,
           fileId: bucketFile.$id,
         });
-        handleError(error, "Failed to create file row");
+        handleError(error, "Failed to create file row in tablesDB");
       });
     revalidatePath(path);
     return createdFileRow;
@@ -63,7 +69,12 @@ export async function uploadFile({
   }
 }
 
-function createQueries(user: Models.DefaultRow) {
+function createQueries(
+  user: Models.DefaultRow,
+  types: string[],
+  sort: string | undefined,
+  limit: number | undefined
+) {
   const queries = [
     Query.or([
       Query.equal("owner", [user.$id]),
@@ -71,18 +82,29 @@ function createQueries(user: Models.DefaultRow) {
     ]),
     Query.select(["*", "owner.*"]),
   ];
+  if (types.length > 0) {
+    queries.push(Query.equal("type", types));
+  }
+  // if (searchQuery) queries.push(Query.contains("name", searchQuery));
+  if (sort) {
+    const [sortBy, orderBy] = sort.split("-");
+
+    const sortQuery =
+      orderBy === "asc" ? Query.orderAsc(sortBy) : Query.orderDesc(sortBy);
+    queries.push(sortQuery);
+  }
   return queries;
 }
 
-export async function getFiles() {
+export async function getFiles({ types = [], sort, limit }: getFilesParams) {
   const { tablesDB } = await createAdminClient();
 
-  const authenticatedUser = await getAuthenticatedUser();
-  if (!authenticatedUser) {
+  const user = await getAuthenticatedUser();
+  if (!user) {
     throw new Error("User not authenticated");
   }
 
-  const queries = createQueries(authenticatedUser);
+  const queries = createQueries(user, types, sort, limit);
   try {
     const files = await tablesDB.listRows({
       databaseId: appwriteConfig.databaseId,
@@ -95,23 +117,116 @@ export async function getFiles() {
   }
 }
 
+export async function getSearchResultsAction({
+  searchQuery,
+}: {
+  searchQuery: string;
+}) {
+  const { tablesDB } = await createAdminClient();
+
+  const user = await getAuthenticatedUser();
+  if (!user) {
+    throw new Error("User not authenticated");
+  }
+  const queries = [
+    Query.or([
+      Query.equal("owner", [user.$id]),
+      Query.contains("users", [user.email]),
+    ]),
+    Query.contains("name", searchQuery),
+  ];
+
+  try {
+    const files = await tablesDB.listRows({
+      databaseId: appwriteConfig.databaseId,
+      tableId: appwriteConfig.filesTableId,
+      queries: queries,
+    });
+    return files;
+  } catch (error) {
+    handleError(error, "Failed to get search results");
+  }
+}
+
 export async function renameFile({
   fileId,
+  bucketFileId,
   newName,
   extentstion,
   path,
 }: RenameFileParams) {
+  const { tablesDB, storage } = await createAdminClient();
+  const newFileName = `${newName}.${extentstion}`;
+  try {
+    const updatedFile = await tablesDB.updateRow({
+      databaseId: appwriteConfig.databaseId,
+      tableId: appwriteConfig.filesTableId,
+      rowId: fileId,
+      data: { name: newFileName },
+    });
+
+    if (updatedFile) {
+      await storage.updateFile({
+        bucketId: appwriteConfig.bucketId,
+        fileId: bucketFileId,
+        name: newFileName,
+      });
+    }
+
+    revalidatePath(path);
+    return updatedFile;
+  } catch (error) {
+    handleError(error, "Failed to rename file");
+  }
+}
+
+export async function updateSharedUsersFile({
+  fileId,
+  emails,
+  path,
+}: UpdateSharedUsersFileParams) {
   const { tablesDB } = await createAdminClient();
   try {
     const updatedFile = await tablesDB.updateRow({
       databaseId: appwriteConfig.databaseId,
       tableId: appwriteConfig.filesTableId,
       rowId: fileId,
-      data: { name: `${newName}.${extentstion}` },
+      data: { users: emails },
     });
     revalidatePath(path);
     return updatedFile;
   } catch (error) {
-    handleError(error, "Failed to rename file");
+    handleError(error, "Failed to update shared users");
+  }
+}
+
+export async function deleteFile({
+  fileId,
+  bucketFileId,
+  path,
+}: DeleteFileParams) {
+  const { storage, tablesDB } = await createAdminClient();
+  try {
+    const deleteFileRow = await tablesDB.deleteRow({
+      databaseId: appwriteConfig.databaseId,
+      tableId: appwriteConfig.filesTableId,
+      rowId: fileId,
+    });
+
+    if (deleteFileRow) {
+      await storage
+        .deleteFile({
+          bucketId: appwriteConfig.bucketId,
+          fileId: bucketFileId,
+        })
+        .catch((error) => {
+          handleError(error, "Failed to delete file from storage");
+        });
+    }
+
+    revalidatePath(path);
+    return { status: "success" };
+  } catch (error) {
+    handleError(error, "Failed to delete file row");
   }
 }

@@ -1,10 +1,21 @@
 import Card from "@/components/Card";
 import Sort from "@/components/Sort";
 import { getFiles } from "@/lib/actions/file.action";
+import { getFileTypesParams } from "@/lib/utils";
+import { FileType } from "@/types";
 
-async function page({ params }: { params: Promise<{ type: string }> }) {
-  const type = (await params).type;
-  const files = await getFiles();
+async function page({
+  searchParams,
+  params,
+}: {
+  params: Promise<{ type: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const type = ((await params)?.type as string) || "";
+  const sort = ((await searchParams)?.sort as string) || "$createdAt-desc";
+
+  const types = getFileTypesParams(type) as FileType[] | [];
+  const files = await getFiles({ types, sort, limit: 10 });
 
   return (
     <div className="page-container">

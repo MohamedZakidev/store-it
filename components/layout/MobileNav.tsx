@@ -37,9 +37,9 @@ function MobileNav({
       <Image
         src="/assets/icons/logo-full-brand.svg"
         alt="logo"
-        width={120}
-        height={52}
-        className="h-auto"
+        width={224}
+        height={82}
+        className="h-auto w-[120px]"
       />
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
@@ -92,7 +92,7 @@ function MobileNav({
             </ul>
           </nav>
           <Separator className="my-5 bg-light-200/20" />
-          <div className="flex flex-col justify-between gap-5 pb-5">
+          <div className=" flex flex-col justify-between gap-5 pb-5">
             <FileUploader ownerId={ownerId} accountId={accountId} />
             <Button
               type="submit"

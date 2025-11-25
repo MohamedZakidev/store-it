@@ -22,10 +22,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { renameFile } from "@/lib/actions/file.action";
+import {
+  deleteFile,
+  renameFile,
+  updateSharedUsersFile,
+} from "@/lib/actions/file.action";
 import { usePathname } from "next/navigation";
+import DeleteModal from "./actionsModals/DeleteModal";
 import DetailsModal from "./actionsModals/DetailsModal";
 import RenameModal from "./actionsModals/RenameModal";
+import ShareModal from "./actionsModals/ShareModal";
 import { Button } from "./ui/button";
 
 function FileActionsDropdown({ file }: { file: Models.DefaultRow }) {
@@ -34,18 +40,17 @@ function FileActionsDropdown({ file }: { file: Models.DefaultRow }) {
   const [action, setAction] = useState<ActionType | null>(null);
   const [fileName, setFileName] = useState(file.name);
   const [isLoading, setIsLoading] = useState(false);
+  const [sharedEmails, setSharedEmails] = useState<string[]>([]);
 
   const path = usePathname();
 
-  const actionsModal = ["rename", "share", "details", "delete"];
+  const dropdownActions = ["rename", "share", "details", "delete"];
 
   function closeAllModals() {
     setIsModalOpen(false);
     setIsDropdownOpen(false);
     setAction(null);
     setFileName(file.name);
-    // setIsLoading(false);
-    //setEmails([]);
   }
 
   async function handleAction() {
@@ -55,16 +60,25 @@ function FileActionsDropdown({ file }: { file: Models.DefaultRow }) {
         case "rename":
           return await renameFile({
             fileId: file.$id,
+            bucketFileId: file.bucketFileId,
             newName: fileName,
             extentstion: file.extension,
             path: path,
           });
 
         case "share":
-        // return await shareFile(...);
+          return await updateSharedUsersFile({
+            fileId: file.$id,
+            emails: sharedEmails,
+            path: path,
+          });
 
         case "delete":
-        // return await deleteFile(...);
+          return await deleteFile({
+            fileId: file.$id,
+            bucketFileId: file.bucketFileId,
+            path: path,
+          });
 
         default:
           // If no valid action, do nothing
@@ -79,8 +93,21 @@ function FileActionsDropdown({ file }: { file: Models.DefaultRow }) {
 
   function handleDropdownItem(item: ActionType) {
     setAction(item);
-    if (actionsModal.includes(item.value)) {
+    if (dropdownActions.includes(item.value)) {
       setIsModalOpen(true);
+    }
+  }
+
+  async function removeSharedEmail(email: string) {
+    const updatedEmails = sharedEmails.filter((e) => e !== email);
+    const updatedFile = await updateSharedUsersFile({
+      fileId: file.$id,
+      emails: updatedEmails,
+      path: path,
+    });
+    if (updatedFile) {
+      setSharedEmails(updatedEmails);
+      closeAllModals();
     }
   }
 
@@ -97,6 +124,15 @@ function FileActionsDropdown({ file }: { file: Models.DefaultRow }) {
             <RenameModal fileName={fileName} setFileName={setFileName} />
           )}
           {value === "details" && <DetailsModal file={file} />}
+          {value === "share" && (
+            <ShareModal
+              file={file}
+              sharedEmails={sharedEmails}
+              setSharedEmails={setSharedEmails}
+              removeSharedEmail={removeSharedEmail}
+            />
+          )}
+          {value === "delete" && <DeleteModal fileName={file.name} />}
         </DialogHeader>
         {["rename", "share", "delete"].includes(value) && (
           <DialogFooter className="flex flex-col gap-3 md:flex-row">

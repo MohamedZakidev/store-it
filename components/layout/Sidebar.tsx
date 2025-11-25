@@ -26,9 +26,9 @@ function Sidebar({ fullName, email, avatar }: SidebarProps) {
         <Image
           src="/assets/icons/logo-full-brand.svg"
           alt="Logo"
-          width={160}
-          height={50}
-          className="hidden h-auto lg:block"
+          width={224}
+          height={82}
+          className="hidden lg:block"
         />
       </Link>
 

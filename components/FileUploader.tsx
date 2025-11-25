@@ -27,7 +27,7 @@ export default function FileUploader({
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
-      setFiles(acceptedFiles);
+      setFiles((prev) => [...prev, ...acceptedFiles]);
 
       const uploadPromises = acceptedFiles.map(async (file) => {
         if (file.size > MAX_FILE_SIZE) {
@@ -103,9 +103,10 @@ export default function FileUploader({
                     <p>{file.name}</p>
                     <Image
                       src="/assets/icons/file-loader.gif"
-                      width={80}
-                      height={26}
+                      width={150}
+                      height={8}
                       alt="loader"
+                      className="w-[80px] h-auto"
                     />
                   </div>
                 </div>
