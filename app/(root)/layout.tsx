@@ -4,6 +4,8 @@ import Sidebar from "@/components/layout/Sidebar";
 import { getAuthenticatedUser } from "@/lib/actions/user.actions";
 import { redirect } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 async function layout({ children }: { children: React.ReactNode }) {
   const authenticatedUser = await getAuthenticatedUser();
 
