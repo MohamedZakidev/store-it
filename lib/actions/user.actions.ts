@@ -107,8 +107,8 @@ export async function verifyEmailOTP({
 }
 
 export async function getAuthenticatedUser() {
-  const { account, tablesDB } = await createSessionClient();
   try {
+    const { account, tablesDB } = await createSessionClient();
     const result = await account.get();
     const user = await tablesDB.listRows({
       databaseId: appwriteConfig.databaseId,
@@ -117,7 +117,7 @@ export async function getAuthenticatedUser() {
     });
     return user.total > 0 ? user.rows[0] : null;
   } catch (error) {
-    handleError(error, "Failed to get authenticated user");
+    console.log(error, "Failed to get authenticated user");
   }
 }
 
