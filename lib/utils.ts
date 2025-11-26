@@ -1,3 +1,4 @@
+import { totalSpaceType } from "@/types";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { appwriteConfig } from "./appwrite/config";
@@ -144,13 +145,13 @@ export const convertFileSize = (sizeInBytes: number, digits?: number) => {
     return sizeInBytes + " Bytes"; // Less than 1 KB, show in Bytes
   } else if (sizeInBytes < 1024 * 1024) {
     const sizeInKB = sizeInBytes / 1024;
-    return sizeInKB.toFixed(digits || 1) + " KB"; // Less than 1 MB, show in KB
+    return sizeInKB.toFixed(digits || 1) + "KB"; // Less than 1 MB, show in KB
   } else if (sizeInBytes < 1024 * 1024 * 1024) {
     const sizeInMB = sizeInBytes / (1024 * 1024);
-    return sizeInMB.toFixed(digits || 1) + " MB"; // Less than 1 GB, show in MB
+    return sizeInMB.toFixed(digits || 1) + "MB"; // Less than 1 GB, show in MB
   } else {
     const sizeInGB = sizeInBytes / (1024 * 1024 * 1024);
-    return sizeInGB.toFixed(digits || 1) + " GB"; // 1 GB or more, show in GB
+    return sizeInGB.toFixed(digits || 1) + "GB"; // 1 GB or more, show in GB
   }
 };
 
@@ -191,4 +192,46 @@ export const formatDateTime = (isoString: string | null | undefined) => {
 
 export const constructDownloadUrl = (bucketFileId: string) => {
   return `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${process.env.NEXT_PUBLIC_APPWRITE_BUCKET}/files/${bucketFileId}/download?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID}`;
+};
+
+export const getUsageSummary = (totalSpace: totalSpaceType) => {
+  return [
+    {
+      title: "Documents",
+      size: totalSpace.document.size,
+      latestDate: totalSpace.document.latestDate,
+      icon: "/assets/icons/file-document-light.svg",
+      url: "/documents",
+    },
+    {
+      title: "Images",
+      size: totalSpace.image.size,
+      latestDate: totalSpace.image.latestDate,
+      icon: "/assets/icons/file-image-light.svg",
+      url: "/images",
+    },
+    {
+      title: "Media",
+      size: totalSpace.video.size + totalSpace.audio.size,
+      latestDate:
+        totalSpace.video.latestDate > totalSpace.audio.latestDate
+          ? totalSpace.video.latestDate
+          : totalSpace.audio.latestDate,
+      icon: "/assets/icons/file-video-light.svg",
+      url: "/media",
+    },
+    {
+      title: "Others",
+      size: totalSpace.other.size,
+      latestDate: totalSpace.other.latestDate,
+      icon: "/assets/icons/file-other-light.svg",
+      url: "/others",
+    },
+  ];
+};
+
+export const calculatePercentage = (sizeInBytes: number) => {
+  const totalSizeInBytes = 2 * 1024 * 1024 * 1024; // 2GB in bytes
+  const percentage = (sizeInBytes / totalSizeInBytes) * 100;
+  return Number(percentage.toFixed(2));
 };

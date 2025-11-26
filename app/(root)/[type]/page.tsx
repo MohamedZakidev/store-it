@@ -1,8 +1,12 @@
 import Card from "@/components/Card";
 import Sort from "@/components/Sort";
-import { getFiles } from "@/lib/actions/file.action";
-import { getFileTypesParams } from "@/lib/utils";
-import { FileType } from "@/types";
+import { getFiles, getTotalSpaceUsed } from "@/lib/actions/file.action";
+import {
+  convertFileSize,
+  getFileTypesParams,
+  getUsageSummary,
+} from "@/lib/utils";
+import { FileType, totalSpaceType } from "@/types";
 
 async function page({
   searchParams,
@@ -16,6 +20,11 @@ async function page({
 
   const types = getFileTypesParams(type) as FileType[] | [];
   const files = await getFiles({ types, sort, limit: 10 });
+  const totalSpace = await getTotalSpaceUsed();
+  const totalSize = getUsageSummary(totalSpace as totalSpaceType);
+  const totalTypeSize = totalSize.filter(
+    (item) => item.title.toLocaleLowerCase() === type
+  )[0].size;
 
   return (
     <div className="page-container">
@@ -24,7 +33,7 @@ async function page({
 
         <div className="total-size-section">
           <p className="body-1">
-            Total: <span className="h5">_total size_</span>
+            Total: <span className="h5">{convertFileSize(totalTypeSize)}</span>
           </p>
 
           <div className="sort-container">

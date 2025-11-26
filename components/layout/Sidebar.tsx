@@ -56,13 +56,6 @@ function Sidebar({ fullName, email, avatar }: SidebarProps) {
           })}
         </ul>
       </nav>
-      <Image
-        src="/assets/images/files-2.png"
-        alt="logo"
-        width={380}
-        height={314}
-        className="w-full h-auto"
-      />
       <div className="sidebar-user-info">
         <Image
           src={avatar || "/assets/images/avatar.png"}

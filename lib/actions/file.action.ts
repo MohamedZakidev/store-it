@@ -2,15 +2,17 @@
 
 import {
   DeleteFileParams,
+  FileType,
   getFilesParams,
   RenameFileParams,
+  totalSpaceType,
   UpdateSharedUsersFileParams,
   UploadFileParams,
 } from "@/types";
 import { revalidatePath } from "next/cache";
 import { ID, Models, Query } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
-import { createAdminClient } from "../appwrite";
+import { createAdminClient, createSessionClient } from "../appwrite";
 import { appwriteConfig } from "../appwrite/config";
 import { constructFileUrl, getFileType } from "../utils";
 import { getAuthenticatedUser } from "./user.actions";
@@ -85,7 +87,8 @@ function createQueries(
   if (types.length > 0) {
     queries.push(Query.equal("type", types));
   }
-  // if (searchQuery) queries.push(Query.contains("name", searchQuery));
+  if (limit) queries.push(Query.limit(limit));
+
   if (sort) {
     const [sortBy, orderBy] = sort.split("-");
 
@@ -228,5 +231,46 @@ export async function deleteFile({
     return { status: "success" };
   } catch (error) {
     handleError(error, "Failed to delete file row");
+  }
+}
+
+// ============================== TOTAL FILE SPACE USED
+export async function getTotalSpaceUsed() {
+  try {
+    const { tablesDB } = await createSessionClient();
+    const currentUser = await getAuthenticatedUser();
+    if (!currentUser) throw new Error("User is not authenticated.");
+
+    const files = await tablesDB.listRows({
+      databaseId: appwriteConfig.databaseId,
+      tableId: appwriteConfig.filesTableId,
+      queries: [Query.equal("owner", [currentUser.$id])],
+    });
+
+    const totalSpace: totalSpaceType = {
+      image: { size: 0, latestDate: "" },
+      document: { size: 0, latestDate: "" },
+      video: { size: 0, latestDate: "" },
+      audio: { size: 0, latestDate: "" },
+      other: { size: 0, latestDate: "" },
+      used: 0,
+      all: 2 * 1024 * 1024 * 1024 /* 2GB available bucket storage */,
+    };
+
+    files.rows.forEach((file) => {
+      const fileType = file.type as FileType;
+      totalSpace[fileType].size += file.size;
+      totalSpace.used += file.size;
+
+      if (
+        !totalSpace[fileType].latestDate ||
+        new Date(file.$updatedAt) > new Date(totalSpace[fileType].latestDate)
+      ) {
+        totalSpace[fileType].latestDate = file.$updatedAt;
+      }
+    });
+    return totalSpace;
+  } catch (error) {
+    handleError(error, "Error calculating total space used:, ");
   }
 }

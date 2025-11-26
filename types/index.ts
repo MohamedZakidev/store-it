@@ -10,6 +10,31 @@ export type ActionType = {
   value: string;
 };
 
+export type totalSpaceType = {
+  image: {
+    size: number;
+    latestDate: string;
+  };
+  document: {
+    size: number;
+    latestDate: string;
+  };
+  video: {
+    size: number;
+    latestDate: string;
+  };
+  audio: {
+    size: number;
+    latestDate: string;
+  };
+  other: {
+    size: number;
+    latestDate: string;
+  };
+  used: number;
+  all: number;
+};
+
 // user action params types
 export type CreateAccountParams = {
   fullName: string;

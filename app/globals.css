@@ -373,7 +373,7 @@
 
   /* Chart */
   .chart {
-    @apply flex items-center rounded-[20px] bg-brand p-5 text-white md:flex-col xl:flex-row !important;
+    @apply flex flex-col items-center rounded-[20px] bg-brand p-5 text-white md:flex-col xl:flex-row !important;
   }
 
   .chart-container {
@@ -397,7 +397,7 @@
   }
 
   .chart-description {
-    @apply subtitle-1 mt-2 w-full text-white/70 md:text-center lg:text-left !important;
+    @apply subtitle-1 mt-2 w-full text-white/70 text-center xl:text-left !important;
   }
 
   /* FileUploader */
